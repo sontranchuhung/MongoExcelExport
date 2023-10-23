@@ -3,6 +3,7 @@ package com.spring.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,38 +24,34 @@ public class ExcelExportUtil {
 
         if (!users.isEmpty()) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            try (OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
-                 @SuppressWarnings("deprecation")
-                 CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("Contract", "Finished", "Email", "CreatedAt"))) {
-
+            try (OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8);
+                    @SuppressWarnings("deprecation")
+                    CSVPrinter csvPrinter = new CSVPrinter(writer,
+                            CSVFormat.DEFAULT.withHeader("\ufeff"+"Contract", "Email", "CreatedAt", "Comment", "Score"))) {
                 for (User user : users) {
                     // Format Date
                     String formattedDate;
                     try {
-                        
                         Date date = user.getCreatedAt();
                         formattedDate = dateFormat.format(date);
                     } catch (Exception e) {
                         throw new IllegalArgumentException("Error formatting date", e);
                     }
-
                     csvPrinter.printRecord(
                             user.getContract(),
-                            user.getFinished(),
                             user.getEmail(),
-                            formattedDate);
+                            formattedDate,
+                            user.getComment(),
+                            user.getScore());
+                            
                 }
                 csvPrinter.flush();
             }
-
             byte[] excelData = byteArrayOutputStream.toByteArray();
-
             return new UserExportDTO("userdata.csv", excelData);
-
         } else {
             return new UserExportDTO("userdata.csv", new byte[0]);
         }
     }
-
 
 }

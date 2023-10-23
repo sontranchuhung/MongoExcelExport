@@ -16,5 +16,7 @@ public class User {
     private String finished;
     private String email;
     private Date createdAt;
+    private String comment;
+    private float score;
 }
 
